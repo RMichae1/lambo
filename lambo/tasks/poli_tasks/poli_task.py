@@ -1,4 +1,3 @@
-from importlib.machinery import all_suffixes
 import numpy as np
 
 from poli import objective_factory
@@ -6,11 +5,9 @@ from poli.core.util.external_observer import ExternalObserver
 
 from lambo.candidate import StringCandidate
 from lambo.tasks.base_task import BaseTask
-from lambo.tasks.poli_task import ALGORITHM, STARTING_N, BATCH_SIZE
-from lambo.tasks.poli_task import POLI_TASK_HYDRA_KEY
+from lambo.tasks.poli_tasks import ALGORITHM, STARTING_N, BATCH_SIZE
+from lambo.tasks.poli_tasks import POLI_TASK_HYDRA_KEY
 
-
-# when registering a poli task in hydra, we'll expect that the value to this key can be passed to poli
 
 global problem_information, f, x0, y0, run_info
 global observer
@@ -27,6 +24,7 @@ class PoliTask(BaseTask):
     def task_setup(self, config, project_root=None, *args, **kwargs):
         global problem_information, f, x0, y0, run_info
         global observer
+        # NOTE: when registering a poli task in hydra, we'll expect that the value to this key can be passed to poli
         problem_name = config["task"][POLI_TASK_HYDRA_KEY]
         seed = config.trial_id
         caller_info = {
