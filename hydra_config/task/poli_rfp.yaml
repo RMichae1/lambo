@@ -1,0 +1,9 @@
+_target_: lambo.tasks.poli_tasks.poli_task.PoliTask
+poli_objective_name: foldx_rfp
+obj_dim: 2
+log_prefix: poli_rfp
+batch_size: 16
+max_len: 244
+max_num_edits: null
+max_ngram_size: 1
+allow_len_change: False
