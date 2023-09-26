@@ -15,3 +15,4 @@ hydra_config/hydra/launcher/ray_aws.yaml
 
 data/experiments/test/
 *.pyc
+*.json

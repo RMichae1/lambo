@@ -12,7 +12,7 @@ class EHVI(object):
     def __init__(self, surrogate, known_targets, num_samples,
                  batch_size, ref_point=None, **kwargs):
         self.ref_point = infer_reference_point(known_targets) if ref_point is None else ref_point
-        sampler = IIDNormalSampler(num_samples=num_samples)
+        sampler = IIDNormalSampler(num_samples) # NOTE: botorch==0.8.5 sample_shape replaces num_samples
         partitioning = NondominatedPartitioning(ref_point=self.ref_point, Y=known_targets)
         acq_kwargs = dict(
             model=surrogate,
