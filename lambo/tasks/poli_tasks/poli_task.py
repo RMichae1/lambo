@@ -9,6 +9,7 @@ from lambo.candidate import StringCandidate
 from lambo.tasks.base_task import BaseTask
 from lambo.tasks.poli_tasks import ALGORITHM, STARTING_N, BATCH_SIZE
 from lambo.tasks.poli_tasks import POLI_TASK_HYDRA_KEY
+from lambo.tasks.poli_tasks import TRACKING_URI
 
 from corel.observers.poli_base_logger import PoliBaseMlFlowObserver
 
@@ -22,7 +23,7 @@ class PoliTask(BaseTask):
         super().__init__(tokenizer, candidate_pool, obj_dim, transform, **kwargs)
         self.op_types = ["sub"]
         self.alphabet: list = None
-        self.observer: object = PoliBaseMlFlowObserver("file:/Users/rcml/corel/results/mlruns/")
+        self.observer: object = PoliBaseMlFlowObserver(TRACKING_URI)
         self.data_path: str = data_path
         self.num_start_examples: int = num_start_examples
         self.poli_parallel: bool = poli_parallelize
