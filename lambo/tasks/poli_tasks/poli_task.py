@@ -22,7 +22,7 @@ class PoliTask(BaseTask):
         super().__init__(tokenizer, candidate_pool, obj_dim, transform, **kwargs)
         self.op_types = ["sub"]
         self.alphabet: list = None
-        self.observer: object = None
+        self.observer: object = PoliBaseMlFlowObserver("file:/Users/rcml/corel/results/mlruns/")
         self.data_path: str = data_path
         self.num_start_examples: int = num_start_examples
         self.poli_parallel: bool = poli_parallelize
@@ -41,7 +41,6 @@ class PoliTask(BaseTask):
             STARTING_N: self.num_start_examples,
             BATCH_SIZE: batch_size,
             }
-        self.observer = PoliBaseMlFlowObserver("file:/Users/rcml/corel/results/mlruns/")
         if problem_name == "foldx_stability_and_sasa": # if additional data i.e. PDBs are needed
             assets_pdb_path = list(Path(self.data_path).glob("*/wt_input_Repair.pdb"))
             if self.num_start_examples > len(assets_pdb_path): # if less data than allowed observations:
