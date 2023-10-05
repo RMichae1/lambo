@@ -7,5 +7,5 @@ max_len: 425
 max_num_edits: null
 max_ngram_size: 1
 allow_len_change: False
-num_start_examples: 1
+num_start_examples: 3
 data_path: /Users/rcml/lambo/lambo/assets/foldx/

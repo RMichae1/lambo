@@ -47,8 +47,13 @@ class PoliTask(BaseTask):
             }
         if self.problem_name == "foldx_stability_and_sasa": # if additional data i.e. PDBs are needed
             self.assets_pdb_path = list(Path(self.data_path).glob("*/wt_input_Repair.pdb"))
-            if self.num_start_examples == 1: # cold-start problem: optimize w.r.t. 1 protein specifically
+            if self.num_start_examples < 5: # cold-start problem: optimize w.r.t. 1 protein specifically
                 self.assets_pdb_paths = [Path(self.data_path) / "1zgo_A" / "wt_input_Repair.pdb"] # pick DsRed specifically.
+                # NOTE: lambo requires multiple observations
+                for _p_path in list(Path(self.data_path).glob("*/wt_input_Repair.pdb"))[:self.num_start_examples-1]: 
+                    if "1zgo_A" in str(_p_path):
+                        continue
+                    self.assets_pdb_paths.append(_p_path)
             if self.num_start_examples > len(self.assets_pdb_path): # if less data than allowed observations:
                 self.num_start_examples = len(self.assets_pdb_path)
                 caller_info[STARTING_N] = len(self.assets_pdb_path)
