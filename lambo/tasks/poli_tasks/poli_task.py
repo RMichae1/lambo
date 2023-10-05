@@ -123,11 +123,12 @@ class PoliTask(BaseTask):
             )
         return y
     
-    def is_feasible(self, candidates):
+    def is_feasible(self, candidates):   
         if self.max_len is None:
             len_feasible = np.ones(candidates.shape).astype(bool)
         else:
             len_feasible = np.array([len(cand) <= self.max_len for cand in candidates]).reshape(-1)
+        is_feasible = len_feasible # Default: no PDB
         if self.assets_pdb_path is not None: 
             # if we're working with PDB and FoldX we have to check feasibility
             pdb_feasible = []
@@ -139,7 +140,7 @@ class PoliTask(BaseTask):
                     continue
                 is_feasible.append(1)
             pdb_feasible = np.array(is_feasible).astype(bool)
-        is_feasible = len_feasible * pdb_feasible
+            is_feasible = len_feasible * pdb_feasible
         assert is_feasible.shape[0] == candidates.shape[0]
         return is_feasible
     
