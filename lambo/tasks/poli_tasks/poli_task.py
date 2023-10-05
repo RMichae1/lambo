@@ -26,6 +26,7 @@ class PoliTask(BaseTask):
         self.alphabet: list = None
         self.observer: object = PoliBaseMlFlowObserver(TRACKING_URI)
         self.data_path: str = data_path
+        self.assets_pdb_path = None
         self.num_start_examples: int = num_start_examples
         self.poli_parallel: bool = poli_parallelize
         self.poli_workers: int = poli_workers
@@ -46,6 +47,8 @@ class PoliTask(BaseTask):
             }
         if self.problem_name == "foldx_stability_and_sasa": # if additional data i.e. PDBs are needed
             self.assets_pdb_path = list(Path(self.data_path).glob("*/wt_input_Repair.pdb"))
+            if self.num_start_examples == 1: # cold-start problem: optimize w.r.t. 1 protein specifically
+                self.assets_pdb_paths = [Path(self.data_path) / "1zgo_A" / "wt_input_Repair.pdb"] # pick DsRed specifically.
             if self.num_start_examples > len(self.assets_pdb_path): # if less data than allowed observations:
                 self.num_start_examples = len(self.assets_pdb_path)
                 caller_info[STARTING_N] = len(self.assets_pdb_path)
@@ -120,23 +123,23 @@ class PoliTask(BaseTask):
             )
         return y
     
-
     def is_feasible(self, candidates):
         if self.max_len is None:
-            is_feasible = np.ones(candidates.shape).astype(bool)
+            len_feasible = np.ones(candidates.shape).astype(bool)
         else:
-            is_feasible = np.array([len(cand) <= self.max_len for cand in candidates]).reshape(-1)
-        if self.asset_pdb_path is not None: 
+            len_feasible = np.array([len(cand) <= self.max_len for cand in candidates]).reshape(-1)
+        if self.assets_pdb_path is not None: 
             # if we're working with PDB and FoldX we have to check feasibility
-            is_feasible = []
+            pdb_feasible = []
             for candidate in candidates:
                 try:
-                    _pdb = find_closest_wildtype_pdb_file_to_mutant(self.assets_pdb_path, candidate.mutant_residue_seq.lower())
+                    _ = find_closest_wildtype_pdb_file_to_mutant(self.assets_pdb_path, candidate.mutant_residue_seq.lower())
                 except ValueError:
                     is_feasible.append(0)
                     continue
                 is_feasible.append(1)
-            is_feasible = np.array(is_feasible).astype(bool)
+            pdb_feasible = np.array(is_feasible).astype(bool)
+        is_feasible = len_feasible * pdb_feasible
         assert is_feasible.shape[0] == candidates.shape[0]
         return is_feasible
     
