@@ -121,7 +121,7 @@ class PoliTask(BaseTask):
     def score(self, candidates):
         y = np.zeros([len(candidates), y0.shape[1]])
         for i in range(len(candidates)):
-            seq = candidates[i].mutant_residue_seq.lower()
+            seq = candidates[i].mutant_residue_seq.upper()
             y[i, ...] = f(np.atleast_2d(list(seq)))
             self.observer.observe(
                 np.array([candidates[i].mutant_residue_seq]), y[i:i+1, ...]
