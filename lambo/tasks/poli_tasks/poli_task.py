@@ -10,7 +10,6 @@ from lambo.candidate import StringCandidate
 from lambo.tasks.base_task import BaseTask
 from lambo.tasks.poli_tasks import ALGORITHM, STARTING_N, BATCH_SIZE
 from lambo.tasks.poli_tasks import POLI_TASK_HYDRA_KEY
-from lambo.tasks.poli_tasks import TRACKING_URI
 
 from corel.observers.poli_base_logger import PoliBaseMlFlowObserver
 
