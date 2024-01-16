@@ -24,6 +24,7 @@ class PoliTask(BaseTask):
         super().__init__(tokenizer, candidate_pool, obj_dim, transform, **kwargs)
         self.op_types = ["sub"]
         self.alphabet: list = None
+        TRACKING_URI = f"file:{str(Path.home().resolve())}/corel/results/mlruns/"
         self.observer: object = PoliBaseMlFlowObserver(TRACKING_URI)
         self.data_path: str = data_path
         self.assets_pdb_path = None
