@@ -66,7 +66,8 @@ class PoliTask(BaseTask):
             force_register=True,
             parallelize=self.poli_parallel, # NOTE: factory foldx parallelization
             num_workers=self.poli_workers,
-            batch_size=batch_size
+            batch_size=batch_size,
+            n_starting_points=self.num_start_examples,
             )
         else: # Base case
             problem_information, f, x0, y0, run_info = objective_factory.create(
