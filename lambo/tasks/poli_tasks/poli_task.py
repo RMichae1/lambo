@@ -45,7 +45,7 @@ class PoliTask(BaseTask):
             STARTING_N: self.num_start_examples,
             BATCH_SIZE: batch_size,
             }
-        if self.problem_name == "foldx_stability_and_sasa": # if additional data i.e. PDBs are needed
+        if self.problem_name == "rfp_foldx_stability_and_sasa": # if additional data i.e. PDBs are needed
             self.assets_pdb_path = list(Path(self.data_path).glob("*/wt_input_Repair.pdb"))
             if self.num_start_examples < 5: # cold-start problem: optimize w.r.t. 1 protein specifically
                 self.assets_pdb_paths = [Path(self.data_path) / "1zgo_A" / "wt_input_Repair.pdb"] # pick DsRed specifically.
