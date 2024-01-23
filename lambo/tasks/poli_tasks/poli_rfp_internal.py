@@ -3,10 +3,12 @@ Wrap task setup to set variables of the observer.
 Extends basic lambo task: ProxyRFPTask
 """
 import logging
+from pathlib import Path
 import numpy as np
 from poli.core.util import batch
 from poli.core.util.external_observer import ExternalObserver
 
+import lambo
 from lambo.tasks.proxy_rfp.proxy_rfp import ProxyRFPTask
 from poli.objective_repository.foldx_rfp_lambo import RFPWrapperFactory
 from poli.objective_repository.foldx_rfp_lambo import ALGORITHM, STARTING_N, BATCH_SIZE
@@ -31,6 +33,8 @@ class PoliRFPInternal(ProxyRFPTask):
         )
 
     def task_setup(self, config, project_root, *args, **kwargs):
+        if project_root is None:
+            project_root = str(Path(lambo.__file__).parent.parent.resolve())
         base_candidates, base_targets, all_seqs, all_targets = super().task_setup(
             config, project_root=project_root, *args, **kwargs
         )
