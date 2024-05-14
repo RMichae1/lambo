@@ -1,18 +1,17 @@
 from multiprocessing import pool
-import numpy as np
 from pathlib import Path
 
+import numpy as np
+from corel.observers.poli_base_logger import PoliBaseMlFlowObserver
 from poli import objective_factory
 from poli.core.util.external_observer import ExternalObserver
-from poli.core.util.proteins.mutations import find_closest_wildtype_pdb_file_to_mutant
+from poli.core.util.proteins.mutations import \
+    find_closest_wildtype_pdb_file_to_mutant
 
 from lambo.candidate import StringCandidate
 from lambo.tasks.base_task import BaseTask
-from lambo.tasks.poli_tasks import ALGORITHM, STARTING_N, BATCH_SIZE
-from lambo.tasks.poli_tasks import POLI_TASK_HYDRA_KEY
-
-from corel.observers.poli_base_logger import PoliBaseMlFlowObserver
-
+from lambo.tasks.poli_tasks import (ALGORITHM, BATCH_SIZE, POLI_TASK_HYDRA_KEY,
+                                    SEED, STARTING_N)
 
 global problem_information, f, x0, y0, run_info
 
@@ -23,8 +22,8 @@ class PoliTask(BaseTask):
         super().__init__(tokenizer, candidate_pool, obj_dim, transform, **kwargs)
         self.op_types = ["sub"]
         self.alphabet: list = None
-        TRACKING_URI = f"file:{str(Path.home().resolve())}/corel/results/mlruns/"
-        self.observer: object = PoliBaseMlFlowObserver(TRACKING_URI)
+        self.TRACKING_URI = f"file:{str(Path.home().resolve())}/corel/results/mlruns/"
+        self.observer: object = None
         self.data_path: str = data_path
         self.assets_pdb_path = None
         self.num_start_examples: int = num_start_examples
@@ -44,6 +43,7 @@ class PoliTask(BaseTask):
             ALGORITHM: "LAMBO",
             STARTING_N: self.num_start_examples,
             BATCH_SIZE: batch_size,
+            SEED: seed,
             }
         if self.problem_name == "rfp_foldx_stability_and_sasa": # if additional data i.e. PDBs are needed
             self.assets_pdb_path = list(Path(self.data_path).glob("*/wt_input_Repair.pdb"))
@@ -57,33 +57,46 @@ class PoliTask(BaseTask):
             if self.num_start_examples > len(self.assets_pdb_path): # if less data than allowed observations:
                 self.num_start_examples = len(self.assets_pdb_path)
                 caller_info[STARTING_N] = len(self.assets_pdb_path)
-            problem_information, f, x0, y0, run_info = objective_factory.create(
-            name=self.problem_name,
-            seed=seed,
-            caller_info=caller_info,
-            wildtype_pdb_path=self.assets_pdb_path,
-            observer=self.observer,
-            force_register=True,
-            parallelize=self.poli_parallel, # NOTE: factory foldx parallelization
-            num_workers=self.poli_workers,
-            batch_size=batch_size,
-            n_starting_points=self.num_start_examples,
-            )
-        else: # Base case
-            problem_information, f, x0, y0, run_info = objective_factory.create(
+            problem = objective_factory.create(
                 name=self.problem_name,
                 seed=seed,
-                caller_info=caller_info,
-                observer=self.observer,
+                wildtype_pdb_path=self.assets_pdb_path,
+                force_register=True,
+                parallelize=self.poli_parallel, # NOTE: factory foldx parallelization
+                num_workers=self.poli_workers,
+                batch_size=1, # NOTE: if not one threading errors
+                n_starting_points=self.num_start_examples,
+            )
+            f, x0 = problem.black_box, problem.x0
+            y0 = f(x0)
+            observer = PoliBaseMlFlowObserver(self.TRACKING_URI).initialize_observer(
+                    problem_setup_info=problem.black_box.info, 
+                    caller_info=caller_info, 
+                    x0=x0, y0=y0, 
+                    seed=seed)
+            problem.black_box.set_observer(observer)
+        else: # Base case
+            problem = objective_factory.create(
+                name=self.problem_name,
+                seed=seed,
                 force_register=True,
                 parallelize=self.poli_parallel, # NOTE: factory foldx parallelization
                 num_workers=self.poli_workers,
                 batch_size=batch_size
             )
+            f, x0 = problem.black_box, problem.x0
+            y0 = f(x0)
+            observer = PoliBaseMlFlowObserver(self.TRACKING_URI).initialize_observer(
+                    problem_setup_info=problem.black_box.info, 
+                    caller_info=caller_info, 
+                    x0=x0, y0=y0, 
+                    seed=seed)
+            problem.black_box.set_observer(observer)
         # number of allowed starting sequences:
         if self.num_start_examples is not None:
             x0 = x0[:self.num_start_examples]
             y0 = y0[:self.num_start_examples]
+        assert len(x0) == self.num_start_examples, "Correct amount of starting samples"
         assert caller_info.get(STARTING_N) == y0.shape[0] == x0.shape[0], "Setting the number of starting examples is illegal for poli tasks!"
         self.alphabet = problem_information.get_alphabet()
         x0_ = x0.copy()

@@ -1,5 +1,5 @@
 _target_: lambo.tasks.poli_tasks.poli_task.PoliTask
-poli_objective_name: foldx_stability_and_sasa
+poli_objective_name: rfp_foldx_stability_and_sasa
 obj_dim: 2
 log_prefix: poli_rfp
 batch_size: 1
